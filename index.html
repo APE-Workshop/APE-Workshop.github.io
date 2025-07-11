@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>APE Workshop에 참여해주셔서 감사합니다.</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+    }
+    input[type="text"], textarea, input[type="file"], select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .stars input {
+      display: none;
+    }
+    .stars label {
+      font-size: 24px;
+      color: #ccc;
+      cursor: pointer;
+    }
+    .stars input:checked ~ label,
+    .stars label:hover,
+    .stars label:hover ~ label {
+      color: gold;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h2>리뷰 작성</h2>
+  <form id="reviewForm">
+    <label for="eventSelect">캠프 선택 *</label>
+    <select id="eventSelect" required></select>
+
+    <label for="name">이름 (선택)</label>
+    <input type="text" name="name" id="name" placeholder="이름을 입력하지 않아도 됩니다.">
+
+    <label>만족도 *</label>
+    <div class="stars">
+      <input type="radio" id="star5" name="rating" value="5" required><label for="star5">★</label>
+      <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
+      <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
+      <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
+      <input type="radio" id="star1" name="rating" value="1"><label for="star1">★</label>
+    </div>
+
+    <label for="good">좋았던 점</label>
+    <textarea name="good" id="good" rows="4" placeholder="좋았던 점을 작성해주세요."></textarea>
+
+    <label for="bad">개선되었으면 하는 점</label>
+    <textarea name="bad" id="bad" rows="4" placeholder="아쉬웠던 점이나 개선 아이디어를 적어주세요."></textarea>
+
+    <label for="image">이미지 업로드 (선택)</label>
+    <input type="file" id="image" accept="image/*" />
+
+    <button type="submit">제출하기</button>
+  </form>
+
+  <script>
+    const scriptUrl = "YOUR_SCRIPT_URL_HERE"; // Apps Script 웹앱 URL로 교체
+    let base64Image = "";
+
+    // 캠프 목록 로드
+    async function loadEvents() {
+      const response = await fetch(`${scriptUrl}?action=events`);
+      const events = await response.json();
+      const select = document.getElementById("eventSelect");
+
+      events.forEach(event => {
+        const option = document.createElement("option");
+        option.value = event.id;
+        option.textContent = `${event.name} (${event.date})`;
+        option.dataset.name = event.name;
+        select.appendChild(option);
+      });
+    }
+
+    // 이미지 base64 변환
+    document.getElementById("image").addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onloadend = function () {
+        base64Image = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // 리뷰 제출
+    document.getElementById("reviewForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const select = document.getElementById("eventSelect");
+      const selectedOption = select.options[select.selectedIndex];
+
+      const data = {
+        eventId: selectedOption.value,
+        eventName: selectedOption.dataset.name,
+        name: form.name.value.trim(),
+        rating: form.rating.value,
+        good: form.good.value,
+        bad: form.bad.value,
+        imageBase64: base64Image
+      };
+
+      try {
+        const response = await fetch(scriptUrl, {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: { "Content-Type": "application/json" }
+        });
+
+        const result = await response.json();
+        if (result.result === "success") {
+          alert("리뷰가 제출되었습니다!");
+          form.reset();
+          base64Image = "";
+        } else {
+          alert("제출 실패: " + JSON.stringify(result));
+        }
+      } catch (error) {
+        alert("에러 발생: " + error);
+      }
+    });
+
+    loadEvents();
+  </script>
+</body>
+</html>
