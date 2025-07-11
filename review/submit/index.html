@@ -14,10 +14,8 @@
       border-radius: 10px;
       box-sizing: border-box;
     }
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 15px;
+    label span.required {
+      color: red;
     }
     input[type="text"], textarea, input[type="file"], select {
       width: 100%;
@@ -27,61 +25,6 @@
       border: 1px solid #ccc;
       box-sizing: border-box;
       resize: none;
-    }
-    .char-count {
-      font-size: 0.9em;
-      text-align: right;
-      margin-top: 3px;
-    }
-    .char-count.over {
-      color: red;
-      font-weight: bold;
-    }
-    .stars {
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-start;
-      gap: 5px;
-      margin-top: 5px;
-    }
-    .stars input {
-      display: none;
-    }
-    .stars label {
-      font-size: 28px;
-      color: #ccc;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-    .stars input:checked ~ label,
-    .stars label:hover,
-    .stars label:hover ~ label {
-      color: gold;
-    }
-    #preview {
-      margin-top: 10px;
-      max-width: 100px;
-      max-height: 100px;
-      display: none;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-    #no-events-message {
-      color: #b00;
-      font-weight: bold;
-      margin-top: 20px;
-    }
-    #skeleton {
-      display: block;
-      background: repeating-linear-gradient(90deg, #eee, #ddd, #eee 20%);
-      height: 100px;
-      margin-top: 20px;
-      animation: pulse 1.2s infinite;
-    }
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
     }
     button {
       margin-top: 20px;
@@ -97,26 +40,17 @@
     button:hover {
       background-color: #45a049;
     }
-    @media (max-width: 600px) {
-      body {
-        margin: 10px;
-        padding: 15px;
-      }
-    }
   </style>
 </head>
 <body>
-  <h2>APE Workshop에 참여해주셔서 감사합니다</h2>
-  <div id="skeleton"></div>
-  <div id="no-events-message" style="display: none;">현재 리뷰 작성 가능한 캠프가 없습니다.</div>
-  <form id="reviewForm" style="display: none;">
-    <label for="eventSelect">캠프 선택 *</label>
+  <form id="reviewForm">
+    <label for="eventSelect">캠프 선택 <span class="required">*</span></label>
     <select id="eventSelect" required></select>
 
     <label for="name">이름 (선택)</label>
     <input type="text" name="name" id="name" placeholder="이름을 입력하지 않아도 됩니다.">
 
-    <label>만족도 *</label>
+    <label>만족도 <span class="required">*</span></label>
     <div class="stars">
       <input type="radio" id="star1" name="rating" value="1" required><label for="star1">★</label>
       <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
@@ -135,7 +69,7 @@
 
     <label for="image">이미지 업로드 (선택)</label>
     <input type="file" id="image" accept="image/*" />
-    <img id="preview" alt="이미지 미리보기" />
+    <img id="preview" alt="이미지 미리보기" style="max-width:100px; max-height:100px; margin-top:10px; display:none;" />
 
     <button type="submit">제출하기</button>
   </form>
@@ -150,41 +84,31 @@
         const events = await response.json();
         const select = document.getElementById("eventSelect");
 
-        document.getElementById("skeleton").style.display = "none";
-
-        if (events.length === 0) {
-          document.getElementById("no-events-message").style.display = "block";
-        } else {
-          document.getElementById("reviewForm").style.display = "block";
-        }
-
-        events.forEach((event, index) => {
-          const option = document.createElement("option");
-          option.value = event.id;
-
-          const onlyDate = new Date(event.date).toLocaleDateString('ko-KR', {
-            year: 'numeric', month: '2-digit', day: '2-digit'
+        if (events.length > 0) {
+          events.forEach((event, index) => {
+            const option = document.createElement("option");
+            option.value = event.id;
+            const onlyDate = new Date(event.date).toLocaleDateString('ko-KR', {
+              year: 'numeric', month: '2-digit', day: '2-digit'
+            });
+            option.textContent = `${event.name} (${onlyDate})`;
+            option.dataset.name = event.name;
+            select.appendChild(option);
+            if (index === 0) {
+              select.selectedIndex = 0;
+            }
           });
-
-          option.textContent = `${event.name} (${onlyDate})`;
-          option.dataset.name = event.name;
-          select.appendChild(option);
-
-          if (index === 0) {
-            select.selectedIndex = 0;
-          }
-        });
+        } else {
+          document.getElementById("reviewForm").innerHTML = '<p style="color:red">현재 리뷰 작성 가능한 캠프가 없습니다.</p>';
+        }
       } catch (error) {
-        document.getElementById("skeleton").style.display = "none";
-        document.getElementById("no-events-message").style.display = "block";
-        console.error("캠프 정보를 불러오는 중 오류 발생:", error);
+        document.getElementById("reviewForm").innerHTML = '<p style="color:red">캠프 정보를 불러오는 중 오류가 발생했습니다.</p>';
       }
     }
 
     document.getElementById("image").addEventListener("change", function (e) {
       const file = e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onloadend = function () {
         base64Image = reader.result;
@@ -214,11 +138,9 @@
 
     document.getElementById("reviewForm").addEventListener("submit", async function (e) {
       e.preventDefault();
-
       const form = e.target;
       const select = document.getElementById("eventSelect");
       const selectedOption = select.options[select.selectedIndex];
-
       const data = {
         eventId: selectedOption.value,
         eventName: selectedOption.dataset.name,
@@ -235,7 +157,6 @@
           body: JSON.stringify(data),
           headers: { "Content-Type": "application/json" }
         });
-
         const result = await response.json();
         if (result.result === "success") {
           alert("리뷰가 제출되었습니다!");
