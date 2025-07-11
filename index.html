@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>APE Workshop에 참여해주셔서 감사합니다.</title>
   <style>
     body {
@@ -11,6 +12,7 @@
       padding: 20px;
       border: 1px solid #ccc;
       border-radius: 10px;
+      box-sizing: border-box;
     }
     label {
       font-weight: bold;
@@ -23,14 +25,23 @@
       margin-top: 5px;
       border-radius: 5px;
       border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    .stars {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: flex-start;
+      gap: 5px;
+      margin-top: 5px;
     }
     .stars input {
       display: none;
     }
     .stars label {
-      font-size: 24px;
+      font-size: 28px;
       color: #ccc;
       cursor: pointer;
+      transition: color 0.2s;
     }
     .stars input:checked ~ label,
     .stars label:hover,
@@ -39,8 +50,23 @@
     }
     button {
       margin-top: 20px;
-      padding: 10px 20px;
+      padding: 12px 20px;
       font-size: 16px;
+      width: 100%;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    @media (max-width: 600px) {
+      body {
+        margin: 10px;
+        padding: 15px;
+      }
     }
   </style>
 </head>
