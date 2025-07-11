@@ -1,14 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>$1  <style>
-    body {
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-    }
-  </style>
-<meta charset="UTF-8">
+<head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>APE Workshop에 참여해주셔서 감사합니다.</title>
   <style>
@@ -20,6 +13,10 @@
       border: 1px solid #ccc;
       border-radius: 10px;
       box-sizing: border-box;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
     label {
       font-weight: bold;
@@ -45,11 +42,11 @@
       font-weight: bold;
     }
     .stars {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  gap: 5px;
-}
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      gap: 5px;
+    }
     .stars input {
       display: none;
     }
@@ -59,16 +56,14 @@
       cursor: pointer;
       transition: color 0.2s;
     }
-    .stars label {
-  color: #ccc;
-}
-.stars input:checked ~ label {
-  color: #ccc;
-}
-.stars input:checked + label,
-.stars input:checked + label ~ label {
-  color: gold;
-}
+    /* 선택된 별 및 왼쪽 별들을 금색으로 */
+    .stars input:checked ~ label {
+      color: #ccc;
+    }
+    .stars input:checked + label,
+    .stars input:checked + label ~ label {
+      color: gold;
+    }
     #preview {
       margin-top: 10px;
       max-width: 100px;
@@ -129,12 +124,12 @@
 
     <label>만족도 *</label>
     <div class="stars">
-  <input type="radio" id="star5" name="rating" value="1" required><label for="star5">★</label>
-  <input type="radio" id="star4" name="rating" value="2"><label for="star4">★</label>
-  <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
-  <input type="radio" id="star2" name="rating" value="4"><label for="star2">★</label>
-  <input type="radio" id="star1" name="rating" value="5"><label for="star1">★</label>
-</div>
+      <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
+      <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
+      <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
+      <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
+      <input type="radio" id="star1" name="rating" value="1" required><label for="star1">★</label>
+    </div>
 
     <label for="good">좋았던 점</label>
     <textarea name="good" id="good" rows="4" maxlength="500" placeholder="좋았던 점을 작성해주세요."></textarea>
@@ -156,12 +151,11 @@
     let base64Image = "";
 
     async function loadEvents() {
+      const skeleton = document.getElementById("skeleton");
       try {
         const response = await fetch(`${scriptUrl}?action=events`);
         const events = await response.json();
         const select = document.getElementById("eventSelect");
-
-        document.getElementById("skeleton").style.display = "none";
 
         if (events.length === 0) {
           document.getElementById("no-events-message").style.display = "block";
@@ -186,9 +180,10 @@
           }
         });
       } catch (error) {
-        document.getElementById("skeleton").style.display = "none";
         document.getElementById("no-events-message").style.display = "block";
         console.error("캠프 정보를 불러오는 중 오류 발생:", error);
+      } finally {
+        skeleton.style.display = "none";
       }
     }
 
@@ -265,12 +260,10 @@
       }
     });
 
+    document.addEventListener("contextmenu", e => e.preventDefault());
+    document.addEventListener("selectstart", e => e.preventDefault());
+
     loadEvents();
-  </script>
-  <script>
-    document.addEventListener("contextmenu", function (e) {
-      e.preventDefault();
-    });
   </script>
 </body>
 </html>
