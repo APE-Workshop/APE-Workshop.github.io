@@ -142,11 +142,10 @@
         return;
       }
 
-      events.forEach(event => {
+      events.forEach((event, index) => {
         const option = document.createElement("option");
         option.value = event.id;
 
-        // 날짜만 추출 (yyyy-mm-dd)
         const onlyDate = new Date(event.date).toLocaleDateString('ko-KR', {
           year: 'numeric', month: '2-digit', day: '2-digit'
         });
@@ -154,6 +153,11 @@
         option.textContent = `${event.name} (${onlyDate})`;
         option.dataset.name = event.name;
         select.appendChild(option);
+
+        if (index === 0) {
+          select.selectedIndex = 0;
+        }
+      });
       });
     }
 
