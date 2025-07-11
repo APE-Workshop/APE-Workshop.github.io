@@ -26,6 +26,16 @@
       border-radius: 5px;
       border: 1px solid #ccc;
       box-sizing: border-box;
+      resize: none;
+    }
+    .char-count {
+      font-size: 0.9em;
+      text-align: right;
+      margin-top: 3px;
+    }
+    .char-count.over {
+      color: red;
+      font-weight: bold;
     }
     .stars {
       display: flex;
@@ -89,10 +99,12 @@
     </div>
 
     <label for="good">좋았던 점</label>
-    <textarea name="good" id="good" rows="4" placeholder="좋았던 점을 작성해주세요."></textarea>
+    <textarea name="good" id="good" rows="4" maxlength="500" placeholder="좋았던 점을 작성해주세요."></textarea>
+    <div id="good-count" class="char-count">0 / 500</div>
 
     <label for="bad">개선되었으면 하는 점</label>
-    <textarea name="bad" id="bad" rows="4" placeholder="아쉬웠던 점이나 개선 아이디어를 적어주세요."></textarea>
+    <textarea name="bad" id="bad" rows="4" maxlength="500" placeholder="아쉬웠던 점이나 개선 아이디어를 적어주세요."></textarea>
+    <div id="bad-count" class="char-count">0 / 500</div>
 
     <label for="image">이미지 업로드 (선택)</label>
     <input type="file" id="image" accept="image/*" />
@@ -131,6 +143,24 @@
       reader.readAsDataURL(file);
     });
 
+    // 글자 수 카운터
+    function setupCharCounter(id, counterId, maxLen) {
+      const input = document.getElementById(id);
+      const counter = document.getElementById(counterId);
+      input.addEventListener("input", () => {
+        const length = input.value.length;
+        counter.textContent = `${length} / ${maxLen}`;
+        if (length >= maxLen) {
+          counter.classList.add("over");
+        } else {
+          counter.classList.remove("over");
+        }
+      });
+    }
+
+    setupCharCounter("good", "good-count", 500);
+    setupCharCounter("bad", "bad-count", 500);
+
     // 리뷰 제출
     document.getElementById("reviewForm").addEventListener("submit", async function (e) {
       e.preventDefault();
@@ -161,6 +191,10 @@
           alert("리뷰가 제출되었습니다!");
           form.reset();
           base64Image = "";
+          document.getElementById("good-count").textContent = "0 / 500";
+          document.getElementById("bad-count").textContent = "0 / 500";
+          document.getElementById("good-count").classList.remove("over");
+          document.getElementById("bad-count").classList.remove("over");
         } else {
           alert("제출 실패: " + JSON.stringify(result));
         }
