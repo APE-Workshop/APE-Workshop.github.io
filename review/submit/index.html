@@ -53,11 +53,10 @@
       cursor: pointer;
       transition: color 0.2s;
     }
-    .stars input:checked ~ label,
-    .stars label:hover,
-    .stars label:hover ~ label {
-      color: gold;
-    }
+    .stars input:checked + label,
+.stars input:checked + label ~ label {
+  color: gold;
+}
     #preview {
       margin-top: 10px;
       max-width: 100px;
@@ -118,12 +117,12 @@
 
     <label>만족도 *</label>
     <div class="stars">
-      <input type="radio" id="star1" name="rating" value="1" required><label for="star1">★</label>
-      <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
-      <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
-      <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
-      <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
-    </div>
+  <input type="radio" id="star1" name="rating" value="1" required><label for="star1">★</label>
+  <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
+  <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
+  <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
+  <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
+</div>
 
     <label for="good">좋았던 점</label>
     <textarea name="good" id="good" rows="4" maxlength="500" placeholder="좋았던 점을 작성해주세요."></textarea>
