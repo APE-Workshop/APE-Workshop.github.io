@@ -1,7 +1,14 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-  <meta charset="UTF-8">
+<head>$1  <style>
+    body {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+  </style>
+<meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>APE Workshop에 참여해주셔서 감사합니다.</title>
   <style>
@@ -254,6 +261,11 @@
     });
 
     loadEvents();
+  </script>
+  <script>
+    document.addEventListener("contextmenu", function (e) {
+      e.preventDefault();
+    });
   </script>
 </body>
 </html>
