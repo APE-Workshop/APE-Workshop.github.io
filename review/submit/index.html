@@ -66,6 +66,11 @@
       border-radius: 4px;
       border: 1px solid #ccc;
     }
+    #no-events-message {
+      color: #b00;
+      font-weight: bold;
+      margin-top: 20px;
+    }
     button {
       margin-top: 20px;
       padding: 12px 20px;
@@ -90,6 +95,7 @@
 </head>
 <body>
   <h2>APE Camp에 참여해주셔서 감사합니다</h2>
+  <div id="no-events-message" style="display: none;">현재 리뷰 작성 가능한 캠프가 없습니다.</div>
   <form id="reviewForm">
     <label for="eventSelect">캠프 선택 *</label>
     <select id="eventSelect" required></select>
@@ -122,13 +128,19 @@
   </form>
 
   <script>
-    const scriptUrl = "YOUR_SCRIPT_URL_HERE"; // Apps Script 웹앱 URL로 교체
+    const scriptUrl = "YOUR_SCRIPT_URL_HERE";
     let base64Image = "";
 
     async function loadEvents() {
       const response = await fetch(`${scriptUrl}?action=events`);
       const events = await response.json();
       const select = document.getElementById("eventSelect");
+
+      if (events.length === 0) {
+        document.getElementById("reviewForm").style.display = "none";
+        document.getElementById("no-events-message").style.display = "block";
+        return;
+      }
 
       events.forEach(event => {
         const option = document.createElement("option");
