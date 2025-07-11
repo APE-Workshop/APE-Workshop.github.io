@@ -71,6 +71,18 @@
       font-weight: bold;
       margin-top: 20px;
     }
+    #skeleton {
+      display: block;
+      background: repeating-linear-gradient(90deg, #eee, #ddd, #eee 20%);
+      height: 100px;
+      margin-top: 20px;
+      animation: pulse 1.2s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
     button {
       margin-top: 20px;
       padding: 12px 20px;
@@ -95,8 +107,9 @@
 </head>
 <body>
   <h2>APE Camp에 참여해주셔서 감사합니다</h2>
+  <div id="skeleton"></div>
   <div id="no-events-message" style="display: none;">현재 리뷰 작성 가능한 캠프가 없습니다.</div>
-  <form id="reviewForm">
+  <form id="reviewForm" style="display: none;">
     <label for="eventSelect">캠프 선택 *</label>
     <select id="eventSelect" required></select>
 
@@ -105,12 +118,12 @@
 
     <label>만족도 *</label>
     <div class="stars">
-  <input type="radio" id="star1" name="rating" value="1" required><label for="star1">★</label>
-  <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
-  <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
-  <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
-  <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
-</div>
+      <input type="radio" id="star1" name="rating" value="1" required><label for="star1">★</label>
+      <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
+      <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
+      <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
+      <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
+    </div>
 
     <label for="good">좋았던 점</label>
     <textarea name="good" id="good" rows="4" maxlength="500" placeholder="좋았던 점을 작성해주세요."></textarea>
@@ -132,33 +145,40 @@
     let base64Image = "";
 
     async function loadEvents() {
-      const response = await fetch(`${scriptUrl}?action=events`);
-      const events = await response.json();
-      const select = document.getElementById("eventSelect");
+      try {
+        const response = await fetch(`${scriptUrl}?action=events`);
+        const events = await response.json();
+        const select = document.getElementById("eventSelect");
 
-      if (events.length === 0) {
-        document.getElementById("reviewForm").style.display = "none";
-        document.getElementById("no-events-message").style.display = "block";
-        return;
-      }
+        document.getElementById("skeleton").style.display = "none";
 
-      events.forEach((event, index) => {
-        const option = document.createElement("option");
-        option.value = event.id;
-
-        const onlyDate = new Date(event.date).toLocaleDateString('ko-KR', {
-          year: 'numeric', month: '2-digit', day: '2-digit'
-        });
-
-        option.textContent = `${event.name} (${onlyDate})`;
-        option.dataset.name = event.name;
-        select.appendChild(option);
-
-        if (index === 0) {
-          select.selectedIndex = 0;
+        if (events.length === 0) {
+          document.getElementById("no-events-message").style.display = "block";
+        } else {
+          document.getElementById("reviewForm").style.display = "block";
         }
-      });
-      });
+
+        events.forEach((event, index) => {
+          const option = document.createElement("option");
+          option.value = event.id;
+
+          const onlyDate = new Date(event.date).toLocaleDateString('ko-KR', {
+            year: 'numeric', month: '2-digit', day: '2-digit'
+          });
+
+          option.textContent = `${event.name} (${onlyDate})`;
+          option.dataset.name = event.name;
+          select.appendChild(option);
+
+          if (index === 0) {
+            select.selectedIndex = 0;
+          }
+        });
+      } catch (error) {
+        document.getElementById("skeleton").style.display = "none";
+        document.getElementById("no-events-message").style.display = "block";
+        console.error("캠프 정보를 불러오는 중 오류 발생:", error);
+      }
     }
 
     document.getElementById("image").addEventListener("change", function (e) {
