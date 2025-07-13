@@ -203,7 +203,6 @@
     function createCard(r, index) {
       const name = r["이름"]?.trim() || "익명";
       const good = r["좋았던점"]?.trim();
-      const bad = r["개선점"]?.trim();
       const image = r["이미지"]?.startsWith("data:image");
       return `
         <div class="review-card ${index === 0 ? 'active' : ''}">
@@ -211,7 +210,6 @@
           <div class="meta">🕒 ${formatRelativeTime(r["제출일"])} · 👤 ${name}</div>
           <div class="stars">${getStars(parseInt(r["만족도"]))}</div>
           ${good ? `<div class="section-title">✨ 좋았던 점</div><div class="review-text">${good}</div>` : ''}
-          ${bad ? `<div class="section-title">🛠️ 개선점</div><div class="review-text">${bad}</div>` : ''}
           ${image ? `<img class="review-image" src="${r["이미지"]}" alt="리뷰 이미지">` : ''}
         </div>`;
     }
