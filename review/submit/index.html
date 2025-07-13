@@ -13,9 +13,6 @@
       border: 1px solid #ccc;
       border-radius: 10px;
       box-sizing: border-box;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
       user-select: none;
     }
     label {
@@ -170,18 +167,13 @@
         events.forEach((event, index) => {
           const option = document.createElement("option");
           option.value = event.id;
-
           const onlyDate = new Date(event.date).toLocaleDateString('ko-KR', {
             year: 'numeric', month: '2-digit', day: '2-digit'
           });
-
           option.textContent = `${event.name} (${onlyDate})`;
           option.dataset.name = event.name;
           select.appendChild(option);
-
-          if (index === 0) {
-            select.selectedIndex = 0;
-          }
+          if (index === 0) select.selectedIndex = 0;
         });
       } catch (error) {
         document.getElementById("no-events-message").style.display = "block";
@@ -194,7 +186,6 @@
     document.getElementById("image").addEventListener("change", function (e) {
       const file = e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onloadend = function () {
         base64Image = reader.result;
@@ -235,7 +226,7 @@
       formData.append("imageBase64", base64Image);
 
       try {
-        const response = await fetch(scriptUrl, {
+        await fetch(scriptUrl, {
           method: "POST",
           body: formData
         });
