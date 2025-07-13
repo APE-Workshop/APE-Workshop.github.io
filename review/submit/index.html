@@ -225,38 +225,31 @@
       const select = document.getElementById("eventSelect");
       const selectedOption = select.options[select.selectedIndex];
 
-      const data = {
-        eventId: selectedOption.value,
-        eventName: selectedOption.dataset.name,
-        name: form.name.value.trim(),
-        rating: form.rating.value,
-        good: form.good.value,
-        bad: form.bad.value,
-        imageBase64: base64Image
-      };
+      const formData = new URLSearchParams();
+      formData.append("eventId", selectedOption.value);
+      formData.append("eventName", selectedOption.dataset.name);
+      formData.append("name", form.name.value.trim());
+      formData.append("rating", form.rating.value);
+      formData.append("good", form.good.value);
+      formData.append("bad", form.bad.value);
+      formData.append("imageBase64", base64Image);
 
       try {
         const response = await fetch(scriptUrl, {
           method: "POST",
-          body: JSON.stringify(data),
-          headers: { "Content-Type": "application/json" }
+          body: formData
         });
 
-        const result = await response.json();
-        if (result.result === "success") {
-          alert("리뷰가 제출되었습니다!");
-          form.reset();
-          base64Image = "";
-          document.getElementById("preview").style.display = "none";
-          document.getElementById("good-count").textContent = "0 / 500";
-          document.getElementById("bad-count").textContent = "0 / 500";
-          document.getElementById("good-count").classList.remove("over");
-          document.getElementById("bad-count").classList.remove("over");
-        } else {
-          alert("제출 실패: " + JSON.stringify(result));
-        }
+        alert("리뷰가 제출되었습니다!");
+        form.reset();
+        base64Image = "";
+        document.getElementById("preview").style.display = "none";
+        document.getElementById("good-count").textContent = "0 / 500";
+        document.getElementById("bad-count").textContent = "0 / 500";
+        document.getElementById("good-count").classList.remove("over");
+        document.getElementById("bad-count").classList.remove("over");
       } catch (error) {
-        alert("에러 발생: " + error);
+        alert("제출 실패: " + error);
       }
     });
 
