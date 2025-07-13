@@ -153,6 +153,16 @@
         flex: 0 0 90%;
       }
     }
+  .review-card.left {
+      opacity: 0.3;
+      transform: scale(0.85) translateX(-30%);
+      z-index: 1;
+    }
+    .review-card.right {
+      opacity: 0.3;
+      transform: scale(0.85) translateX(30%);
+      z-index: 1;
+    }
   </style>
 </head>
 <body>
@@ -225,8 +235,11 @@
     }
 
     function moveNext() {
-      let next = (currentIndex + 1) % reviews.length;
-      moveToIndex(next);
+      if (currentIndex < reviews.length - 1) {
+        moveToIndex(currentIndex + 1);
+      } else {
+        moveToIndex(0);
+      }
     }
 
     window.onload = loadCarousel;
@@ -235,7 +248,12 @@
       const track = document.getElementById("carouselTrack");
       currentIndex = index;
       const cards = document.querySelectorAll('.review-card');
-      cards.forEach(c => c.classList.remove('active'));
+      cards.forEach((c, i) => {
+        c.classList.remove('active', 'left', 'right');
+        if (i === index) c.classList.add('active');
+        else if (i === index - 1) c.classList.add('left');
+        else if (i === index + 1) c.classList.add('right');
+      });
       if (cards[index]) cards[index].classList.add('active');
       const offset = cards[index].offsetLeft - track.offsetWidth / 2 + cards[index].offsetWidth / 2;
       track.style.transform = `translateX(-${offset}px)`;
