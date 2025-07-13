@@ -6,7 +6,7 @@
   <title>APE Workshop에 참여해주셔서 감사합니다.</title>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Pretendard', sans-serif;
       max-width: 600px;
       margin: 30px auto;
       padding: 20px;
@@ -15,26 +15,32 @@
       box-sizing: border-box;
       user-select: none;
     }
+    h2 {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
     label {
       font-weight: bold;
       display: block;
-      margin-top: 15px;
+      margin-top: 20px;
     }
     .required {
       color: red;
       margin-left: 3px;
     }
-    input[type="text"], textarea, input[type="file"], select {
+    input[type="text"], textarea, input[type="file"] {
       width: 100%;
-      padding: 8px;
+      padding: 10px;
       margin-top: 5px;
-      border-radius: 5px;
+      border-radius: 6px;
       border: 1px solid #ccc;
       box-sizing: border-box;
       resize: none;
+      font-size: 15px;
     }
     .char-count {
-      font-size: 0.9em;
+      font-size: 0.85em;
       text-align: right;
       margin-top: 3px;
     }
@@ -48,6 +54,7 @@
       justify-content: flex-start;
       gap: 5px;
       direction: rtl;
+      margin-top: 5px;
     }
     .stars input {
       display: none;
@@ -65,6 +72,41 @@
     .stars input:checked + label ~ label {
       color: gold;
     }
+    .custom-select {
+      position: relative;
+      user-select: none;
+      margin-top: 5px;
+    }
+    .custom-select .selected {
+      padding: 10px 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background-color: white;
+      cursor: pointer;
+    }
+    .custom-select .options {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+      z-index: 10;
+    }
+    .custom-select .options li {
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+    .custom-select .options li:hover {
+      background-color: #f2f2f2;
+    }
+    .custom-select.open .options {
+      display: block;
+    }
     #preview {
       margin-top: 10px;
       max-width: 100px;
@@ -73,25 +115,8 @@
       border-radius: 4px;
       border: 1px solid #ccc;
     }
-    #no-events-message {
-      color: #b00;
-      font-weight: bold;
-      margin-top: 20px;
-    }
-    #skeleton {
-      display: block;
-      background: repeating-linear-gradient(90deg, #eee, #ddd, #eee 20%);
-      height: 100px;
-      margin-top: 20px;
-      animation: pulse 1.2s infinite;
-    }
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
-    }
     button {
-      margin-top: 20px;
+      margin-top: 30px;
       padding: 12px 20px;
       font-size: 16px;
       width: 100%;
@@ -104,21 +129,20 @@
     button:hover {
       background-color: #45a049;
     }
-    @media (max-width: 600px) {
-      body {
-        margin: 10px;
-        padding: 15px;
-      }
-    }
   </style>
 </head>
 <body>
   <h2>APE Workshop에 참여해주셔서 감사합니다</h2>
-  <div id="skeleton"></div>
-  <div id="no-events-message" style="display: none;">현재 리뷰 작성 가능한 캠프가 없습니다.</div>
-  <form id="reviewForm" style="display: none;">
-    <label for="eventSelect">캠프 선택 <span class="required">*</span></label>
-    <select id="eventSelect" required></select>
+  <form id="reviewForm">
+    <label for="eventId">캠프 선택<span class="required">*</span></label>
+    <div class="custom-select" id="campSelect">
+      <div class="selected" data-value="">캠프를 선택하세요</div>
+      <ul class="options">
+        <li data-value="camp001">제 1회 APE Arduino Camp</li>
+        <li data-value="camp002">제 2회 APE Workshop</li>
+      </ul>
+      <input type="hidden" name="eventId" id="eventId" />
+    </div>
 
     <label for="name">이름 (선택)</label>
     <input type="text" name="name" id="name" placeholder="이름을 입력하지 않아도 됩니다.">
@@ -148,41 +172,36 @@
   </form>
 
   <script>
-    const scriptUrl = "https://script.google.com/macros/s/AKfycbzkW8dCBKWthe8WlJ3uyB-hjIIJq4s8N5U3Ko4Jx9SwBDF-VCfoOMTVVApDqwuEz9kN/exec";
-    let base64Image = "";
+    // 드롭다운
+    const campSelect = document.getElementById("campSelect");
+    const selected = campSelect.querySelector(".selected");
+    const options = campSelect.querySelector(".options");
+    const hiddenInput = campSelect.querySelector("input[type='hidden']");
 
-    async function loadEvents() {
-      const skeleton = document.getElementById("skeleton");
-      try {
-        const response = await fetch(`${scriptUrl}?action=events`);
-        const events = await response.json();
-        const select = document.getElementById("eventSelect");
+    selected.addEventListener("click", () => {
+      campSelect.classList.toggle("open");
+    });
 
-        if (events.length === 0) {
-          document.getElementById("no-events-message").style.display = "block";
-        } else {
-          document.getElementById("reviewForm").style.display = "block";
-        }
+    options.addEventListener("click", (e) => {
+      if (e.target.tagName === "LI") {
+        const value = e.target.dataset.value;
+        const label = e.target.textContent;
 
-        events.forEach((event, index) => {
-          const option = document.createElement("option");
-          option.value = event.id;
-          const onlyDate = new Date(event.date).toLocaleDateString('ko-KR', {
-            year: 'numeric', month: '2-digit', day: '2-digit'
-          });
-          option.textContent = `${event.name} (${onlyDate})`;
-          option.dataset.name = event.name;
-          select.appendChild(option);
-          if (index === 0) select.selectedIndex = 0;
-        });
-      } catch (error) {
-        document.getElementById("no-events-message").style.display = "block";
-        console.error("캠프 정보를 불러오는 중 오류 발생:", error);
-      } finally {
-        skeleton.style.display = "none";
+        selected.textContent = label;
+        selected.dataset.value = value;
+        hiddenInput.value = value;
+        campSelect.classList.remove("open");
       }
-    }
+    });
 
+    document.addEventListener("click", (e) => {
+      if (!campSelect.contains(e.target)) {
+        campSelect.classList.remove("open");
+      }
+    });
+
+    // 이미지 미리보기
+    let base64Image = "";
     document.getElementById("image").addEventListener("change", function (e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -196,6 +215,7 @@
       reader.readAsDataURL(file);
     });
 
+    // 문자 수 카운터
     function setupCharCounter(id, counterId, maxLen) {
       const input = document.getElementById(id);
       const counter = document.getElementById(counterId);
@@ -209,16 +229,14 @@
     setupCharCounter("good", "good-count", 500);
     setupCharCounter("bad", "bad-count", 500);
 
+    // 폼 제출
     document.getElementById("reviewForm").addEventListener("submit", async function (e) {
       e.preventDefault();
 
       const form = e.target;
-      const select = document.getElementById("eventSelect");
-      const selectedOption = select.options[select.selectedIndex];
-
       const formData = new URLSearchParams();
-      formData.append("eventId", selectedOption.value);
-      formData.append("eventName", selectedOption.dataset.name);
+      formData.append("eventId", document.getElementById("eventId").value);
+      formData.append("eventName", document.querySelector(".selected").textContent);
       formData.append("name", form.name.value.trim());
       formData.append("rating", form.rating.value);
       formData.append("good", form.good.value);
@@ -226,7 +244,7 @@
       formData.append("imageBase64", base64Image);
 
       try {
-        await fetch(scriptUrl, {
+        await fetch("https://script.google.com/macros/s/AKfycbzkW8dCBKWthe8WlJ3uyB-hjIIJq4s8N5U3Ko4Jx9SwBDF-VCfoOMTVVApDqwuEz9kN/exec", {
           method: "POST",
           body: formData
         });
@@ -239,15 +257,11 @@
         document.getElementById("bad-count").textContent = "0 / 500";
         document.getElementById("good-count").classList.remove("over");
         document.getElementById("bad-count").classList.remove("over");
+        document.querySelector(".selected").textContent = "캠프를 선택하세요";
       } catch (error) {
         alert("제출 실패: " + error);
       }
     });
-
-    document.addEventListener("contextmenu", e => e.preventDefault());
-    document.addEventListener("selectstart", e => e.preventDefault());
-
-    loadEvents();
   </script>
 </body>
 </html>
