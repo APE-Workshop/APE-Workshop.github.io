@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>리뷰 전체 보기</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
+    }
+    h1 {
+      text-align: center;
+    }
+    .sort-controls {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .review-list {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .review-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    .stars {
+      color: gold;
+    }
+    .review-image {
+      margin-top: 10px;
+      max-width: 100%;
+      border-radius: 6px;
+    }
+    .pagination {
+      text-align: center;
+      margin: 30px 0;
+    }
+    .pagination button {
+      margin: 0 5px;
+      padding: 6px 12px;
+      border: none;
+      background: #333;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>📄 전체 리뷰 보기</h1>
+  <div class="sort-controls">
+    정렬: 
+    <select id="sortOrder">
+      <option value="desc">최신순</option>
+      <option value="asc">오래된순</option>
+    </select>
+  </div>
+  <div class="review-list" id="reviewList"></div>
+  <div class="pagination" id="pagination"></div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycby4lo9rjCqbSYRSNHtXIoYCgry9fkdFyKr-wz2OxdSR1RwQrp6ys34wrgnNbNLaC5Pv/exec?mode=review";
+    let reviews = [];
+    let page = 1;
+    const perPage = 5;
+
+    function getStars(n) {
+      return '⭐'.repeat(n) + '☆'.repeat(5 - n);
+    }
+
+    function formatDate(dateString) {
+      const d = new Date(new Date(dateString).getTime() + 9 * 60 * 60 * 1000);
+      return `${d.getFullYear()}.${(d.getMonth() + 1).toString().padStart(2,'0')}.${d.getDate().toString().padStart(2,'0')}`;
+    }
+
+    function renderReviews() {
+      const list = document.getElementById('reviewList');
+      const start = (page - 1) * perPage;
+      const selected = reviews.slice(start, start + perPage);
+      list.innerHTML = selected.map(r => {
+        const name = r["이름"]?.trim() || "익명";
+        const image = r["이미지"]?.startsWith("data:image") ? `<img class='review-image' src='${r["이미지"]}' />` : "";
+        return `
+          <div class="review-card">
+            <div><strong>${r["캠프명"]}</strong> · ${formatDate(r["제출일"])} · 👤 ${name}</div>
+            <div class="stars">${getStars(Number(r["만족도"]))}</div>
+            ${r["좋았던점"] ? `<div><strong>✨ 좋았던 점</strong><br>${r["좋았던점"]}</div>` : ""}
+            ${image}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderPagination() {
+      const totalPages = Math.ceil(reviews.length / perPage);
+      const wrapper = document.getElementById('pagination');
+      wrapper.innerHTML = '';
+      for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        if (i === page) btn.style.background = '#555';
+        btn.onclick = () => { page = i; renderReviews(); renderPagination(); };
+        wrapper.appendChild(btn);
+      }
+    }
+
+    async function load() {
+      const res = await fetch(API_URL);
+      reviews = await res.json();
+      sortAndRender();
+    }
+
+    function sortAndRender() {
+      const sort = document.getElementById('sortOrder').value;
+      reviews.sort((a, b) => sort === 'asc'
+        ? new Date(a["제출일"]) - new Date(b["제출일"])
+        : new Date(b["제출일"]) - new Date(a["제출일"]));
+      page = 1;
+      renderReviews();
+      renderPagination();
+    }
+
+    document.getElementById('sortOrder').addEventListener('change', sortAndRender);
+    load();
+  </script>
+</body>
+</html>
