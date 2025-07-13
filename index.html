@@ -11,6 +11,7 @@
       color: #333;
       padding: 40px 20px;
       text-align: center;
+      overflow-x: hidden;
     }
 
     h1 {
@@ -40,22 +41,39 @@
       font-weight: bold;
     }
 
-    .review-wrapper {
+    .carousel-container {
       position: relative;
-      max-width: 700px;
-      margin: 0 auto 30px auto;
+      width: 100%;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+
+    .carousel-track {
+      display: flex;
+      transition: transform 0.6s ease-in-out;
+      justify-content: center;
+      align-items: center;
     }
 
     .review-card {
+      flex: 0 0 70%;
+      margin: 0 10px;
+      padding: 25px;
       background: #fff;
       border-radius: 15px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      padding: 25px;
+      opacity: 0.4;
+      transform: scale(0.85);
+      transition: transform 0.4s ease, opacity 0.4s ease;
       text-align: left;
+      max-width: 600px;
+      min-width: 280px;
     }
 
-    .review-header {
-      margin-bottom: 10px;
+    .review-card.active {
+      opacity: 1;
+      transform: scale(1);
+      z-index: 2;
     }
 
     .camp-name {
@@ -66,17 +84,18 @@
     .meta {
       font-size: 0.9em;
       color: gray;
+      margin-bottom: 10px;
     }
 
     .stars {
       color: gold;
       font-size: 20px;
-      margin: 10px 0;
+      margin-bottom: 10px;
     }
 
     .section-title {
       font-weight: bold;
-      margin-top: 15px;
+      margin-top: 10px;
     }
 
     .review-text {
@@ -93,33 +112,8 @@
       object-fit: contain;
     }
 
-    .nav-button {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: #eee;
-      border: none;
-      font-size: 1.5em;
-      padding: 10px;
-      cursor: pointer;
-      border-radius: 50%;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .nav-button:hover {
-      background: #ccc;
-    }
-
-    .nav-left {
-      left: -40px;
-    }
-
-    .nav-right {
-      right: -40px;
-    }
-
     .view-all-btn {
-      margin-top: 20px;
+      margin-top: 10px;
       padding: 12px 24px;
       background: #333;
       color: white;
@@ -129,28 +123,9 @@
       cursor: pointer;
     }
 
-    .view-all-btn:hover {
-      background: #111;
-    }
-
-    @media (max-width: 600px) {
-      .nav-left, .nav-right {
-        top: auto;
-        bottom: -40px;
-        left: 25%;
-        right: auto;
-        transform: none;
-      }
-
-      .nav-right {
-        left: auto;
-        right: 25%;
-      }
-
-      .links a {
-        display: block;
-        margin: 10px auto;
-        width: 80%;
+    @media (max-width: 768px) {
+      .review-card {
+        flex: 0 0 80%;
       }
     }
   </style>
@@ -160,25 +135,23 @@
   <h1>🛠️ APE Workshop</h1>
   <p class="description">
     APE Workshop은 Artists, Producers, Engineers가 모여<br>
-    아이디어를 실험하고 함께 배우는 핸즈온 크리에이티브 네트워크입니다.
+    아이디어를 시험하고 함께 방복하는 핸지와 프로케시 네트워크입니다.
   </p>
 
   <div class="links">
     <a href="https://instagram.com/ape.workshop" target="_blank">📷 Instagram</a>
     <a href="https://cafe.naver.com/apeworkshop" target="_blank">☕ 네이버 카페</a>
-    <a href="https://open.kakao.com/o/gApeworkshop" target="_blank">💬 오픈채팅</a>
+    <a href="https://open.kakao.com/o/gApeworkshop" target="_blank">💬 카카오 오픈채팅</a>
   </div>
 
-  <div class="review-wrapper">
-    <button class="nav-button nav-left" onclick="prevReview()">←</button>
-    <div id="review" class="review-card">리뷰 로딩 중...</div>
-    <button class="nav-button nav-right" onclick="nextReview()">→</button>
+  <div class="carousel-container">
+    <div class="carousel-track" id="carouselTrack"></div>
   </div>
 
   <button class="view-all-btn" onclick="location.href='review.html'">📄 리뷰 전체 보기</button>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycby4lo9rjCqbSYRSNHtXIoYCgry9fkdFyKr-wz2OxdSR1RwQrp6ys34wrgnNbNLaC5Pv/exec?mode=review"; // ← 실제 URL로 교체
+    const API_URL = "https://script.google.com/macros/s/AKfycby4lo9rjCqbSYRSNHtXIoYCgry9fkdFyKr-wz2OxdSR1RwQrp6ys34wrgnNbNLaC5Pv/exec?mode=review"; // 실제 URL으로 교체
     let reviews = [];
     let currentIndex = 0;
 
@@ -188,68 +161,53 @@
 
     function formatRelativeTime(utcString) {
       const now = new Date();
-      const kstDate = new Date(new Date(utcString).getTime() + (9 * 60 * 60 * 1000));
-      const diffSec = Math.floor((now - kstDate) / 1000);
-      const diffMin = Math.floor(diffSec / 60);
-      const diffHr = Math.floor(diffMin / 60);
-      const diffDay = Math.floor(diffHr / 24);
-
-      if (diffSec < 60) return `${diffSec}초 전`;
-      else if (diffMin < 60) return `${diffMin}분 전`;
-      else if (diffHr < 24) return `${diffHr}시간 전`;
-      else if (diffDay === 1) return `하루 전`;
-      else return `${kstDate.getFullYear()}.${String(kstDate.getMonth() + 1).padStart(2, '0')}.${String(kstDate.getDate()).padStart(2, '0')}`;
+      const kst = new Date(new Date(utcString).getTime() + 9 * 60 * 60 * 1000);
+      const diff = Math.floor((now - kst) / 1000);
+      const min = Math.floor(diff / 60);
+      const hr = Math.floor(min / 60);
+      const day = Math.floor(hr / 24);
+      if (diff < 60) return `${diff}초 전`;
+      else if (min < 60) return `${min}분 전`;
+      else if (hr < 24) return `${hr}시간 전`;
+      else if (day === 1) return `하루 전`;
+      else return `${kst.getFullYear()}.${String(kst.getMonth() + 1).padStart(2, '0')}.${String(kst.getDate()).padStart(2, '0')}`;
     }
 
-    function renderReview(r) {
+    function createCard(r, index) {
       const name = r["이름"]?.trim() || "익명";
       const good = r["좋았던점"]?.trim();
       const bad = r["개선점"]?.trim();
       const image = r["이미지"]?.startsWith("data:image");
-
-      document.getElementById("review").innerHTML = `
-        <div class="review-header">
+      return `
+        <div class="review-card ${index === 0 ? 'active' : ''}">
           <div class="camp-name">${r["캠프명"]}</div>
           <div class="meta">🕒 ${formatRelativeTime(r["제출일"])} · 👤 ${name}</div>
-        </div>
-        <div class="stars">${getStars(parseInt(r["만족도"]))}</div>
-
-        ${good ? `<div class="section-title">✨ 좋았던 점</div><div class="review-text">${good}</div>` : ''}
-        ${bad ? `<div class="section-title">🛠️ 개선점</div><div class="review-text">${bad}</div>` : ''}
-        ${image ? `<img class="review-image" src="${r["이미지"]}" alt="리뷰 이미지">` : ''}
-      `;
+          <div class="stars">${getStars(parseInt(r["만족도"]))}</div>
+          ${good ? `<div class="section-title">✨ 좋았던 점</div><div class="review-text">${good}</div>` : ''}
+          ${bad ? `<div class="section-title">🛠️ 개선점</div><div class="review-text">${bad}</div>` : ''}
+          ${image ? `<img class="review-image" src="${r["이미지"]}" alt="리뷰 이미지">` : ''}
+        </div>`;
     }
 
-    function showReview(index) {
-      if (reviews.length === 0) return;
-      currentIndex = (index + reviews.length) % reviews.length;
-      renderReview(reviews[currentIndex]);
+    async function loadCarousel() {
+      const res = await fetch(API_URL);
+      reviews = await res.json();
+      const track = document.getElementById("carouselTrack");
+      track.innerHTML = reviews.map(createCard).join('');
+      setInterval(moveNext, 5000);
     }
 
-    function prevReview() {
-      showReview(currentIndex - 1);
+    function moveNext() {
+      const track = document.getElementById("carouselTrack");
+      currentIndex = (currentIndex + 1) % reviews.length;
+      const cards = document.querySelectorAll('.review-card');
+      cards.forEach(c => c.classList.remove('active'));
+      cards[currentIndex].classList.add('active');
+      const offset = cards[currentIndex].offsetLeft - track.offsetWidth / 2 + cards[currentIndex].offsetWidth / 2;
+      track.style.transform = `translateX(-${offset}px)`;
     }
 
-    function nextReview() {
-      showReview(currentIndex + 1);
-    }
-
-    async function loadReviews() {
-      try {
-        const res = await fetch(API_URL);
-        reviews = await res.json();
-        if (reviews.length > 0) {
-          showReview(0);
-        } else {
-          document.getElementById("review").innerHTML = "<p>리뷰가 없습니다.</p>";
-        }
-      } catch (e) {
-        document.getElementById("review").innerHTML = "<p>리뷰를 불러올 수 없습니다.</p>";
-        console.error(e);
-      }
-    }
-
-    window.onload = loadReviews;
+    window.onload = loadCarousel;
   </script>
 
 </body>
