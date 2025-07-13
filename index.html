@@ -46,6 +46,7 @@
       width: 100%;
       overflow: hidden;
       margin-bottom: 30px;
+      min-height: 350px;
     }
 
     .carousel-track {
@@ -74,6 +75,24 @@
       opacity: 1;
       transform: scale(1);
       z-index: 2;
+    }
+
+    .review-skeleton {
+      flex: 0 0 70%;
+      margin: 0 auto;
+      padding: 25px;
+      background: #eee;
+      border-radius: 15px;
+      max-width: 600px;
+      min-width: 280px;
+      height: 300px;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { background-color: #eee; }
+      50% { background-color: #ddd; }
+      100% { background-color: #eee; }
     }
 
     .camp-name {
@@ -123,9 +142,15 @@
       cursor: pointer;
     }
 
+    @media (min-width: 1024px) {
+      .carousel-track {
+        padding: 0 100px;
+      }
+    }
+
     @media (max-width: 768px) {
-      .review-card {
-        flex: 0 0 80%;
+      .review-card, .review-skeleton {
+        flex: 0 0 90%;
       }
     }
   </style>
@@ -145,13 +170,15 @@
   </div>
 
   <div class="carousel-container">
-    <div class="carousel-track" id="carouselTrack"></div>
+    <div class="carousel-track" id="carouselTrack">
+      <div class="review-skeleton"></div>
+    </div>
   </div>
 
   <button class="view-all-btn" onclick="location.href='review.html'">📄 리뷰 전체 보기</button>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycby4lo9rjCqbSYRSNHtXIoYCgry9fkdFyKr-wz2OxdSR1RwQrp6ys34wrgnNbNLaC5Pv/exec?mode=review"; // 실제 URL으로 교체
+    const API_URL = "https://script.google.com/macros/s/AKfycb.../exec?mode=review"; // 실제 URL으로 교체
     let reviews = [];
     let currentIndex = 0;
 
@@ -193,7 +220,9 @@
       const res = await fetch(API_URL);
       reviews = await res.json();
       const track = document.getElementById("carouselTrack");
-      track.innerHTML = reviews.map(createCard).join('');
+      track.innerHTML = reviews.map((r, i) => createCard(r, i)).join('');
+      setTimeout(() => moveNext(), 100);
+      moveNext();
       setInterval(moveNext, 5000);
     }
 
