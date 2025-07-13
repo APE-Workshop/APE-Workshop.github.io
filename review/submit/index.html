@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>APE Workshop에 참여해주셔서 감사합니다.</title>
   <style>
     body {
@@ -22,6 +22,10 @@
       font-weight: bold;
       display: block;
       margin-top: 15px;
+    }
+    .required {
+      color: red;
+      margin-left: 3px;
     }
     input[type="text"], textarea, input[type="file"], select {
       width: 100%;
@@ -46,7 +50,7 @@
       flex-direction: row;
       justify-content: flex-start;
       gap: 5px;
-      direction: rtl; /* 별점 왼쪽부터 채우기 위해 추가됨 */
+      direction: rtl;
     }
     .stars input {
       display: none;
@@ -116,13 +120,13 @@
   <div id="skeleton"></div>
   <div id="no-events-message" style="display: none;">현재 리뷰 작성 가능한 캠프가 없습니다.</div>
   <form id="reviewForm" style="display: none;">
-    <label for="eventSelect">캠프 선택 *</label>
+    <label for="eventSelect">캠프 선택 <span class="required">*</span></label>
     <select id="eventSelect" required></select>
 
     <label for="name">이름 (선택)</label>
     <input type="text" name="name" id="name" placeholder="이름을 입력하지 않아도 됩니다.">
 
-    <label>만족도 *</label>
+    <label>만족도 <span class="required">*</span></label>
     <div class="stars">
       <input type="radio" id="star1" name="rating" value="1" required><label for="star1">★</label>
       <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
@@ -207,11 +211,7 @@
       input.addEventListener("input", () => {
         const length = input.value.length;
         counter.textContent = `${length} / ${maxLen}`;
-        if (length >= maxLen) {
-          counter.classList.add("over");
-        } else {
-          counter.classList.remove("over");
-        }
+        counter.classList.toggle("over", length >= maxLen);
       });
     }
 
