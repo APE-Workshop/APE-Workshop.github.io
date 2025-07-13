@@ -50,41 +50,37 @@
     }
 
     .carousel-track {
-      display: flex;
-      transition: transform 0.6s ease-in-out;
-      justify-content: center;
-      align-items: center;
+      position: relative;
+      height: 100%;
     }
 
     .review-card {
-      flex: 0 0 70%;
-      margin: 0 10px;
-      padding: 25px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%) scale(0.95);
+      opacity: 0;
+      transition: opacity 0.6s ease, transform 0.6s ease;
       background: #fff;
+      padding: 25px;
       border-radius: 15px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      opacity: 0.4;
-      transform: scale(0.85);
-      transition: transform 0.4s ease, opacity 0.4s ease;
-      text-align: left;
       max-width: 600px;
       min-width: 280px;
+      text-align: left;
     }
 
     .review-card.active {
       opacity: 1;
-      transform: scale(1);
+      transform: translateX(-50%) scale(1);
       z-index: 2;
     }
 
     .review-skeleton {
-      flex: 0 0 70%;
+      width: 600px;
       margin: 0 auto;
       padding: 25px;
       background: #eee;
       border-radius: 15px;
-      max-width: 600px;
-      min-width: 280px;
       height: 300px;
       animation: pulse 1.5s infinite;
     }
@@ -141,28 +137,6 @@
       font-weight: bold;
       cursor: pointer;
     }
-
-    @media (min-width: 1024px) {
-      .carousel-track {
-        padding: 0 100px;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .review-card, .review-skeleton {
-        flex: 0 0 90%;
-      }
-    }
-  .review-card.left {
-      opacity: 0.3;
-      transform: scale(0.85) translateX(-30%);
-      z-index: 1;
-    }
-    .review-card.right {
-      opacity: 0.3;
-      transform: scale(0.85) translateX(30%);
-      z-index: 1;
-    }
   </style>
 </head>
 <body>
@@ -188,7 +162,7 @@
   <button class="view-all-btn" onclick="location.href='review.html'">📄 리뷰 전체 보기</button>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycby4lo9rjCqbSYRSNHtXIoYCgry9fkdFyKr-wz2OxdSR1RwQrp6ys34wrgnNbNLaC5Pv/exec?mode=review"; // 실제 URL으로 교체
+    const API_URL = "https://script.google.com/macros/s/AKfycby4lo9rjCqbSYRSNHtXIoYCgry9fkdFyKr-wz2OxdSR1RwQrp6ys34wrgnNbNLaC5Pv/exec?mode=review";
     let reviews = [];
     let currentIndex = 0;
 
@@ -229,35 +203,25 @@
       reviews = await res.json();
       const track = document.getElementById("carouselTrack");
       track.innerHTML = reviews.map((r, i) => createCard(r, i)).join('');
-      moveToIndex(0); // 첫 번째 리뷰를 확실히 활성화
-      setTimeout(() => moveNext(), 5000);
+      moveToIndex(0);
       setInterval(moveNext, 5000);
     }
 
     function moveNext() {
-      if (currentIndex < reviews.length - 1) {
-        moveToIndex(currentIndex + 1);
-      } else {
-        moveToIndex(0);
+      const next = (currentIndex + 1) % reviews.length;
+      moveToIndex(next);
+    }
+
+    function moveToIndex(index) {
+      const cards = document.querySelectorAll('.review-card');
+      cards.forEach(c => c.classList.remove('active'));
+      if (cards[index]) {
+        cards[index].classList.add('active');
       }
+      currentIndex = index;
     }
 
     window.onload = loadCarousel;
-
-    function moveToIndex(index) {
-      const track = document.getElementById("carouselTrack");
-      currentIndex = index;
-      const cards = document.querySelectorAll('.review-card');
-      cards.forEach((c, i) => {
-        c.classList.remove('active', 'left', 'right');
-        if (i === index) c.classList.add('active');
-        else if (i === index - 1) c.classList.add('left');
-        else if (i === index + 1) c.classList.add('right');
-      });
-      if (cards[index]) cards[index].classList.add('active');
-      const offset = cards[index].offsetLeft - track.offsetWidth / 2 + cards[index].offsetWidth / 2;
-      track.style.transform = `translateX(-${offset}px)`;
-    }
   </script>
 
 </body>
