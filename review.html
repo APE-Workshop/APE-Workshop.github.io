@@ -89,7 +89,7 @@
           <div class="review-card">
             <div><strong>${r["캠프명"]}</strong> · ${formatDate(r["제출일"])} · 👤 ${name}</div>
             <div class="stars">${getStars(Number(r["만족도"]))}</div>
-            ${r["좋았던점"] ? `<div><strong>✨ 좋았던 점</strong><br>${r["좋았던점"]}</div>` : ""}
+            ${r["좋았던점"] ? `<div>${r["좋았던점"]}</div>` : ""}
             ${image}
           </div>
         `;

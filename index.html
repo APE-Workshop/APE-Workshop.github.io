@@ -209,7 +209,7 @@
           <div class="camp-name">${r["캠프명"]}</div>
           <div class="meta">🕒 ${formatRelativeTime(r["제출일"])} · 👤 ${name}</div>
           <div class="stars">${getStars(parseInt(r["만족도"]))}</div>
-          ${good ? `<div class="section-title">✨ 좋았던 점</div><div class="review-text">${good}</div>` : ''}
+          ${good ? `<div class="review-text">${good}</div>` : ''}
           ${image ? `<img class="review-image" src="${r["이미지"]}" alt="리뷰 이미지">` : ''}
         </div>`;
     }
