@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>APE Workshop 리뷰 모음</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #f9f9f9;
+      color: #333;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+
+    .intro {
+      font-size: 1em;
+      color: #555;
+      margin-bottom: 30px;
+    }
+
+    .review-card {
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 25px;
+      text-align: left;
+    }
+
+    .review-header {
+      margin-bottom: 10px;
+    }
+
+    .review-header .camp-name {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    .review-header .meta {
+      font-size: 0.9em;
+      color: gray;
+    }
+
+    .stars {
+      color: gold;
+      font-size: 20px;
+      margin: 10px 0;
+    }
+
+    .section-title {
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    .review-text {
+      margin-top: 5px;
+      white-space: pre-wrap;
+    }
+
+    .review-image {
+      margin-top: 15px;
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 10px;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🛠️ APE Workshop 리뷰 모음</h1>
+  <p class="intro">참가자들의 생생한 후기를 확인해보세요!</p>
+
+  <div id="review" class="review-card">
+    <p>로딩 중...</p>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycby4lo9rjCqbSYRSNHtXIoYCgry9fkdFyKr-wz2OxdSR1RwQrp6ys34wrgnNbNLaC5Pv/exec?mode=review"; // 👉 실제 URL로 변경
+
+    function getStars(rating) {
+      return '⭐'.repeat(rating) + '☆'.repeat(5 - rating);
+    }
+
+    function renderReview(r) {
+      const container = document.getElementById("review");
+      const name = r["이름"]?.trim() ? r["이름"] : "익명";
+      const good = r["좋았던점"]?.trim();
+      const bad = r["개선점"]?.trim();
+      const image = r["이미지"]?.startsWith("data:image");
+
+      container.innerHTML = `
+        <div class="review-header">
+          <div class="camp-name">${r["캠프명"]}</div>
+          <div class="meta">🕒 ${r["제출일"]} · 👤 ${name}</div>
+        </div>
+        <div class="stars">${getStars(parseInt(r["만족도"]))}</div>
+
+        ${good ? `
+          <div class="section-title">✨ 좋았던 점</div>
+          <div class="review-text">${good}</div>
+        ` : ''}
+
+        ${bad ? `
+          <div class="section-title">🛠️ 개선점</div>
+          <div class="review-text">${bad}</div>
+        ` : ''}
+
+        ${image ? `<img class="review-image" src="${r["이미지"]}" alt="리뷰 이미지" />` : ''}
+      `;
+    }
+
+    async function loadAndLoop() {
+      try {
+        const res = await fetch(API_URL);
+        const reviews = await res.json();
+        if (!Array.isArray(reviews) || reviews.length === 0) {
+          document.getElementById("review").innerHTML = "<p>리뷰가 없습니다.</p>";
+          return;
+        }
+
+        let index = 0;
+        function showNext() {
+          renderReview(reviews[index]);
+          index = (index + 1) % reviews.length;
+        }
+
+        showNext();
+        setInterval(showNext, 7000); // 7초마다 자동 변경
+      } catch (e) {
+        document.getElementById("review").innerHTML = "<p>리뷰 불러오기에 실패했습니다.</p>";
+        console.error(e);
+      }
+    }
+
+    window.onload = loadAndLoop;
+  </script>
+
+</body>
+</html>
