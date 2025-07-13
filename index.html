@@ -219,22 +219,27 @@
       reviews = await res.json();
       const track = document.getElementById("carouselTrack");
       track.innerHTML = reviews.map((r, i) => createCard(r, i)).join('');
-      setTimeout(() => moveNext(), 100);
-      moveNext();
+      moveToIndex(0); // 첫 번째 리뷰를 확실히 활성화
+      setTimeout(() => moveNext(), 5000);
       setInterval(moveNext, 5000);
     }
 
     function moveNext() {
-      const track = document.getElementById("carouselTrack");
-      currentIndex = (currentIndex + 1) % reviews.length;
-      const cards = document.querySelectorAll('.review-card');
-      cards.forEach(c => c.classList.remove('active'));
-      cards[currentIndex].classList.add('active');
-      const offset = cards[currentIndex].offsetLeft - track.offsetWidth / 2 + cards[currentIndex].offsetWidth / 2;
-      track.style.transform = `translateX(-${offset}px)`;
+      let next = (currentIndex + 1) % reviews.length;
+      moveToIndex(next);
     }
 
     window.onload = loadCarousel;
+
+    function moveToIndex(index) {
+      const track = document.getElementById("carouselTrack");
+      currentIndex = index;
+      const cards = document.querySelectorAll('.review-card');
+      cards.forEach(c => c.classList.remove('active'));
+      if (cards[index]) cards[index].classList.add('active');
+      const offset = cards[index].offsetLeft - track.offsetWidth / 2 + cards[index].offsetWidth / 2;
+      track.style.transform = `translateX(-${offset}px)`;
+    }
   </script>
 
 </body>
