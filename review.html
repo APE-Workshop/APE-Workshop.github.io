@@ -7,8 +7,9 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
+      padding: 16px;
       background: #f9f9f9;
+      margin: 0;
     }
 
     h1 {
@@ -17,7 +18,7 @@
 
     .sort-controls {
       text-align: center;
-      margin: 20px 0;
+      margin: 16px 0;
     }
 
     .review-list {
@@ -27,43 +28,57 @@
 
     .review-card {
       background: white;
-      padding: 20px;
+      padding: 16px;
       border-radius: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
     }
 
     .stars {
       color: gold;
+      font-size: 16px;
+      margin: 8px 0;
     }
 
     .review-image {
       margin-top: 10px;
-      max-width: 100%;
+      width: 100%;
+      max-height: 240px;
+      object-fit: cover;
       border-radius: 6px;
     }
 
     .pagination {
       text-align: center;
-      margin: 30px 0;
+      margin: 24px 0;
     }
 
     .pagination button {
-      margin: 0 5px;
-      padding: 6px 12px;
+      margin: 0 4px;
+      padding: 6px 10px;
       border: none;
       background: #333;
       color: white;
       border-radius: 4px;
       cursor: pointer;
+      font-size: 14px;
     }
 
-    /* 🟨 스켈레톤 스타일 */
     .skeleton {
       background: #eee;
       border-radius: 10px;
-      margin-bottom: 20px;
-      padding: 20px;
+      margin-bottom: 16px;
+      padding: 16px;
       animation: pulse 1.5s infinite ease-in-out;
     }
 
@@ -85,6 +100,32 @@
       0% { opacity: 1; }
       50% { opacity: 0.5; }
       100% { opacity: 1; }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 12px;
+      }
+
+      .review-card {
+        padding: 12px;
+        font-size: 13px;
+      }
+
+      .review-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+
+      .review-image {
+        max-height: 180px;
+      }
+
+      .pagination button {
+        padding: 5px 8px;
+        font-size: 13px;
+      }
     }
   </style>
 </head>
@@ -123,7 +164,11 @@
         const image = r["이미지"]?.startsWith("data:image") ? `<img class='review-image' src='${r["이미지"]}' />` : "";
         return `
           <div class="review-card">
-            <div><strong>${r["캠프명"]}</strong> · ${formatDate(r["제출일"])} · 👤 ${name}</div>
+            <div class="review-header">
+              <div><strong>${r["캠프명"]}</strong></div>
+              <div>${formatDate(r["제출일"])}</div>
+              <div>👤 ${name}</div>
+            </div>
             <div class="stars">${getStars(Number(r["만족도"]))}</div>
             ${r["좋았던점"] ? `<div>${r["좋았던점"]}</div>` : ""}
             ${image}
