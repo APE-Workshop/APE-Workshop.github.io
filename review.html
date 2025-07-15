@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>리뷰 전체 보기</title>
   <style>
     body {
@@ -10,17 +10,21 @@
       padding: 20px;
       background: #f9f9f9;
     }
+
     h1 {
       text-align: center;
     }
+
     .sort-controls {
       text-align: center;
       margin: 20px 0;
     }
+
     .review-list {
       max-width: 800px;
       margin: 0 auto;
     }
+
     .review-card {
       background: white;
       padding: 20px;
@@ -28,18 +32,22 @@
       margin-bottom: 20px;
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
+
     .stars {
       color: gold;
     }
+
     .review-image {
       margin-top: 10px;
       max-width: 100%;
       border-radius: 6px;
     }
+
     .pagination {
       text-align: center;
       margin: 30px 0;
     }
+
     .pagination button {
       margin: 0 5px;
       padding: 6px 12px;
@@ -48,6 +56,35 @@
       color: white;
       border-radius: 4px;
       cursor: pointer;
+    }
+
+    /* 🟨 스켈레톤 스타일 */
+    .skeleton {
+      background: #eee;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      padding: 20px;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    .skeleton-line {
+      height: 14px;
+      background: #ddd;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
+
+    .skeleton-image {
+      height: 160px;
+      background: #ddd;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
     }
   </style>
 </head>
@@ -108,10 +145,39 @@
       }
     }
 
+    function showSkeletons() {
+      const list = document.getElementById('reviewList');
+      list.innerHTML = Array.from({ length: perPage }).map(() => `
+        <div class="skeleton">
+          <div class="skeleton-line" style="width: 60%"></div>
+          <div class="skeleton-line" style="width: 40%"></div>
+          <div class="skeleton-line" style="width: 80%"></div>
+          <div class="skeleton-image"></div>
+        </div>
+      `).join('');
+    }
+
+    function hideSkeletons() {
+      document.getElementById('reviewList').innerHTML = '';
+    }
+
     async function load() {
-      const res = await fetch(API_URL);
-      reviews = await res.json();
-      sortAndRender();
+      showSkeletons();
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error("데이터 요청 실패");
+        reviews = await res.json();
+        sortAndRender();
+      } catch (error) {
+        console.error("리뷰 로딩 실패:", error);
+        hideSkeletons();
+        document.getElementById('reviewList').innerHTML = `
+          <div style="text-align:center; padding: 40px; color: #777;">
+            ⚠️ 리뷰 데이터를 불러오는 데 실패했습니다.<br>
+            나중에 다시 시도해 주세요.
+          </div>
+        `;
+      }
     }
 
     function sortAndRender() {
@@ -120,6 +186,7 @@
         ? new Date(a["제출일"]) - new Date(b["제출일"])
         : new Date(b["제출일"]) - new Date(a["제출일"]));
       page = 1;
+      hideSkeletons();
       renderReviews();
       renderPagination();
     }
